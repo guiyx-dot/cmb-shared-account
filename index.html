@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>招行共用收款账号 · 需求说明</title>
+  <style>
+    :root {
+      --bg: #f3f5f7; --card: #fff; --ink: #1f1f1f; --sub: #595959; --line: #e6e8eb;
+      --ok: #237804; --wait: #ad6800;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif; font-size: 14px; line-height: 1.6; }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 28px 20px 64px; }
+    h1 { margin: 0; font-size: 26px; }
+    h2 { margin: 0 0 12px; font-size: 16px; }
+    h3 { margin: 16px 0 8px; font-size: 14px; }
+    a { color: #0958d9; }
+    .card { background: var(--card); border-radius: 12px; padding: 18px; margin-top: 16px; }
+    .lead { margin: 8px 0 0; color: var(--sub); }
+    .pipe { display: flex; align-items: stretch; gap: 6px; }
+    .node { flex: 1; border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; background: #fafafa; }
+    .node .who { font-size: 12px; color: var(--sub); }
+    .node b { display: block; margin-top: 2px; font-size: 13px; }
+    .node em { display: block; margin-top: 2px; font-style: normal; font-size: 12px; color: var(--sub); }
+    .arr { align-self: center; color: #bfbfbf; }
+    .node.hot { background: #fff7e6; border-color: #ffd591; }
+    .node.ok { background: #f6ffed; border-color: #b7eb8f; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 7px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+    th { background: #fafafa; color: var(--sub); font-weight: 550; }
+    code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }
+    .mark { display: inline-block; min-width: 36px; text-align: center; border-radius: 4px; font-size: 12px; padding: 0 6px; line-height: 20px; }
+    .mark.add { background: #fff1f0; color: #cf1322; }
+    .mark.keep { background: #f5f5f5; color: #595959; }
+    .mark.wait { background: #fff7e6; color: var(--wait); }
+    .foot { margin: 8px 0 0; color: var(--sub); font-size: 12px; }
+    figure { margin: 14px 0 0; }
+    figure img { width: 100%; height: auto; display: block; border: 1px solid var(--line); border-radius: 8px; }
+    figcaption { margin-top: 6px; color: var(--sub); font-size: 12px; }
+    ul { margin: 8px 0 0; padding-left: 18px; }
+    li { margin: 4px 0; }
+    @media (max-width: 720px) { .pipe { flex-direction: column; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>招行共用收款账号</h1>
+    <p class="lead">一级、二级共用同一个收款账号，给商户看的账号整串不变。入账按记账子单元名称区分。名称由我们定义。大昌行原有的两个二级收款账号要注销，已入账数据保留。</p>
+
+    <section class="card">
+      <h2>1. 背景</h2>
+      <p>商户在灵犀开通账号时，收款银行选招商银行，平台调用招行接口，给这个商户开一个记账子单元。商户充值时往这个收款账号打款。商户只有一级、二级。两边都走招商时，可以共用同一个收款账号，用记账子单元名称区分是哪家的钱，名称取营业执照。</p>
+      <figure>
+        <img src="assets/cmb-shared-account/01-merchant-detail.png" alt="商户详情：签约主体、收款银行、共用集团收款码" />
+        <figcaption>商户详情。红框是签约主体、收款银行、共用集团收款码。</figcaption>
+      </figure>
+      <p>这次需求来自大昌行，它是一级商户。它现在的收款账号还没有共用：</p>
+      <ul>
+        <li>一级收款账号和二级收款账号不是同一个。</li>
+        <li>二级按业务有两个收款账号，彼此也不是同一个。一个是招商银行，一个是交通银行。</li>
+      </ul>
+      <p>要改成：这两个原二级收款账号都注销。再在一级那个招商银行收款账号下，新建两个二级子单元，名称用该二级商户的营业执照加业务类型。给商户看的收款账号整串与一级一致。</p>
+    </section>
+
+    <section class="card">
+      <h2>2. 这次要做的</h2>
+      <p>部分商户要在一级或二级下面，再把事故车和续保的充值分开。给商户看的收款账号整串仍然是同一个，不拼子单元编号。招行按记账子单元名称把来款记入对应子单元。哪个子单元收哪个业务，开户时由我们指定。</p>
+      <div class="pipe">
+        <div class="node"><div class="who">同一个收款账号</div><b>事故车</b><em>名称：营业执照+事故车</em></div>
+        <div class="arr">+</div>
+        <div class="node"><div class="who">同一个收款账号</div><b>续保</b><em>名称：营业执照+续保</em></div>
+        <div class="arr">+</div>
+        <div class="node ok"><div class="who">大昌行原二级账号</div><b>注销</b><em>已入账数据保留</em></div>
+      </div>
+      <ul>
+        <li>业务目前只有事故车、续保。这是充值入账的分类，不是审批导入里的那些场景。</li>
+        <li>一级、二级各自判断。一家做了区分，不代表它的上级或下级也要区分。</li>
+        <li>一级和二级是不同商户，营业执照不同，子单元名称不同，所以在同一个收款账号下能分开。</li>
+        <li>同一家二级商户的事故车和续保，用名称里的业务类型分开。</li>
+        <li>不要求商户打款时另填摘要。</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>3. 名称</h2>
+      <table>
+        <thead><tr><th>子单元</th><th>记账子单元名称</th><th>谁来定</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>只区分到商户</td>
+            <td>营业执照</td>
+            <td>我们开户时写入</td>
+          </tr>
+          <tr>
+            <td>还要区分业务</td>
+            <td>营业执照+事故车、营业执照+续保</td>
+            <td>我们开户时写入。一个业务一个子单元</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="foot">名称写在新增记账子单元的「记账子单元名称」<code>dmanam</code>。入账按这个名称归到对应子单元。</p>
+    </section>
+
+    <section class="card">
+      <h2>4. 入账之后</h2>
+      <p>入账后按子单元查询交易明细。指定某个子单元收哪一类业务，查这个子单元，里面就是这一类业务的钱。</p>
+      <p>一级的事故车、一级的续保、二级的事故车、二级的续保，各进各的子单元。没做业务区分的，整笔记进该商户原来的子单元。</p>
+      <p>对不上子单元名称的来款挂起，不记入任何一个商户账户。落进招行默认子单元的，也算对不上。</p>
+    </section>
+
+    <section class="card">
+      <h2>5. 两类商户</h2>
+      <table>
+        <thead><tr><th></th><th>子单元</th><th>新的打款</th><th>记到哪</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>没做业务区分</td>
+            <td><span class="mark keep">不新增</span> 沿用原来的子单元，名称仍是营业执照</td>
+            <td>打到同一个收款账号</td>
+            <td>原来的账户</td>
+          </tr>
+          <tr>
+            <td>做了事故车、续保区分</td>
+            <td><span class="mark add">新增</span> 事故车、续保各一个子单元。大昌行原有的两个二级账号注销，见第 6 节</td>
+            <td>仍打到同一个收款账号</td>
+            <td>按记账子单元名称进入对应业务账户</td>
+          </tr>
+          <tr>
+            <td>名称对不上</td>
+            <td><span class="mark wait">挂起</span></td>
+            <td>打到同一个收款账号，但对不上已有名称</td>
+            <td>不记入任何一个商户账户</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="card">
+      <h2>6. 注销原有账号</h2>
+      <p>大昌行二级现在的两个收款账号全部注销，注销后再按上面的名称新建。一级那个招商银行收款账号留着，作为之后共用的收款账号。</p>
+      <table>
+        <thead><tr><th>原账号</th><th>怎么处理</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>二级 · 招商银行这条</td>
+            <td>调用交易管家（新）的关闭记账子单元 <code>NTDMADLT</code> 注销。注销后不再收款。</td>
+          </tr>
+          <tr>
+            <td>二级 · 交通银行这条</td>
+            <td>同样注销，注销后不再收款。它不是招行子单元，不走 <code>NTDMADLT</code>。具体注销方式待确认。</td>
+          </tr>
+        </tbody>
+      </table>
+      <ul>
+        <li>已入账的数据保留，留在原账户。余额不划到新建的子单元。</li>
+        <li>不用修改接口去改这些旧账号的名称或编号。</li>
+        <li>注销完成前，不要让商户再往旧账号打款。注销之后再打到旧账号的来款挂起，不记入新的业务账户。</li>
+      </ul>
+      <p class="foot">没做这次调整的其他商户，原有子单元不注销。</p>
+    </section>
+
+    <section class="card">
+      <h2>7. 招行接口</h2>
+      <p>文档是交易管家（新）：<a href="https://openbiz.cmbchina.com/clouddc-document?bizkey=DCCT20231226155549458&subclass=1&treeID=2026101315181894338">云直联文档</a>。左边菜单：现金管理 → 交易管家（新）。</p>
+      <table>
+        <thead><tr><th>接口</th><th>这次</th></tr></thead>
+        <tbody>
+          <tr><td>1.1 新增记账子单元 <code>NTDMAADD</code></td><td><span class="mark add">调用</span> 要区分业务的商户，事故车、续保各开一个子单元。名称 <code>dmanam</code> 传营业执照加业务类型。编号用数字，可由系统生成。</td></tr>
+          <tr><td>1.2 关闭记账子单元 <code>NTDMADLT</code></td><td><span class="mark add">调用</span> 注销大昌行二级那条招商银行收款账号。不划转余额。</td></tr>
+          <tr><td>1.3 修改记账子单元 <code>NTDMAMNT</code></td><td><span class="mark keep">不调用</span> 不用它改历史子单元。</td></tr>
+          <tr><td>3.1 交易查询 <code>BHHDZCTZ</code></td><td><span class="mark add">调用</span> 入账后按记账子单元名称 <code>zDumNam</code>、编号 <code>zDumNbr</code> 核对这笔钱属于哪个商户、哪个业务。</td></tr>
+        </tbody>
+      </table>
+      <p class="foot">招行说明：哪个子单元收什么业务由我们指定。入账按记账子单元名称区分。查询该子单元的交易明细，就是这一业务的钱。</p>
+    </section>
+  </div>
+</body>
+</html>
